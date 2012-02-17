@@ -9,23 +9,8 @@ import os
 import subprocess
 import shutil
 
-#class Chdir:         
-#    def __init__( self, newPath ):
-#        try:
-#           self.savedPath = os.getcwd()
-#           os.chdir(newPath)
-#        except:
-#           print("Error: source directory does not exist
-#           sys.exit(3)
-#
-#    def __del__( self ):
-#        os.chdir( self.savedPath )
-
 def usage():
     print '''Usage: svndelta.py source-dir destination-dir
-Parameters:
-    -s, --source-dir The source directory to sync the svn in
-    -d, --dest-dir   The directory to sync to
 '''
 
 def main(argv):
