@@ -60,10 +60,14 @@ def main(argv):
         if preRevision < postRevision:
 
             print "handling update from revision {0} to {1}".format(preRevision, postRevision)
-            files = getFilesChanged(preRevision, postRevision)
+            changedfiles = getFilesChanged(preRevision, postRevision)
+            deletedfiles = getFilesDeleted(preRevision, postRevision)
 
-            for file in files:
-                copyFile(file, source, destination)            
+            for file in changedfiles:
+                copyFile(file, source, destination)
+
+            for file in deletedFiles:
+                deleteFile(file, destination)
 
         else:
             print "No Changes, not syncing"
@@ -75,16 +79,20 @@ def main(argv):
         sys.exit(1)
 
 def getFilesChanged(fro, to):
+    return getFilesOfActions([ "M", "A", "R" ], fro, to)
+
+def getFilesDeleted(fro, to):
+    return getFilesOfActions([ "D" ], fro, to)
+
+def getFilesOfActions(actions, fro, to):
     changelog = execute(["svn", "log", "-r", str(int(fro)+1)+":"+str(to), "-v", "--xml"])[0]
-
-
     files = []
 
     root = objectify.fromstring(changelog);
 
     for path in root.xpath('/log/logentry/paths/path'):
         action = path.get("action")
-        if (action in [ "M", "A" ]):
+        if (action in actions):
             file = path.__str__()
             files.append(file)
             if (action == "M"):
@@ -105,6 +113,14 @@ def copyFile(file, sourceDir, targetDir):
         
         print "Copying " + sourceFile + " to " + destFile 
         shutil.copyfile(sourceFile, destFile)
+
+def deleteFile(file, destDir):
+    path = destDir + file
+    if (os.path.exists(path):
+        if (os.path.isdir(path)):
+            os.rmdir(path)
+        else:
+            os.delete(path)
 
 def chdir(path):
     if os.path.isdir(path) == True:
